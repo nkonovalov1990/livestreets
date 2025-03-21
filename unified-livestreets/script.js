@@ -10,8 +10,25 @@ const mapsListContainer = document.querySelector('[data-maps-list]');
 const loader = document.querySelector('[data-loader]');
 const loaderText = document.querySelector('[data-loader-text]');
 
+// URL Params handling
+const getUrlParams = () => {
+    const params = new URLSearchParams(window.location.search);
+    return {
+        setId: params.get('set')
+    };
+};
+
+const updateUrlParams = (setId) => {
+    const url = new URL(window.location);
+    url.searchParams.set('set', setId);
+    window.history.pushState({}, '', url);
+};
+
 // State
-let currentSet = SETS.find(set => set.default) || SETS[0];
+const urlParams = getUrlParams();
+let currentSet = SETS.find(set => set.id === urlParams.setId) || 
+                SETS.find(set => set.default) || 
+                SETS[0];
 let currentMap = currentSet.maps.find(map => map.default) || currentSet.maps[0];
 let viewer = null;
 
@@ -152,8 +169,21 @@ const loadMap = () => {
 setsSelect.addEventListener('change', (e) => {
     currentSet = SETS.find(set => set.id === e.target.value);
     currentMap = currentSet.maps.find(map => map.default) || currentSet.maps[0];
+    updateUrlParams(currentSet.id);
     renderMaps();
     loadMap();
+});
+
+// Handle browser back/forward buttons
+window.addEventListener('popstate', () => {
+    const { setId } = getUrlParams();
+    if (setId && setId !== currentSet.id) {
+        currentSet = SETS.find(set => set.id === setId) || currentSet;
+        currentMap = currentSet.maps.find(map => map.default) || currentSet.maps[0];
+        renderSets();
+        renderMaps();
+        loadMap();
+    }
 });
 
 // Zoom controls
