@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Карты LiveStreets</title>
+    <link rel="stylesheet" href="./style.css">
+    <link rel="stylesheet" href="./assets/viewer.min.css">
+</head>
+<body>
+    <div class="loader-text" data-loader-text>Загрузка карты...</div>
+    <div class="loader" data-loader>
+        <div></div><div></div><div></div><div></div>
+    </div>
+
+    <div class="map" data-map></div>
+
+    <div class="navigation">
+        <div>
+            <label for="sets-select">Набор карт:</label>
+            <select id="sets-select" data-sets-select></select>
+        </div>
+
+        <div class="maps-list" data-maps-list></div>
+    </div>
+
+    <div class="zoom">
+        <button title="Увеличить масштаб (+)" data-plan-zoom-in>+</button>
+        <button title="Уменьшить масштаб (-)" data-plan-zoom-out>-</button>
+    </div>
+
+    <script src="./assets/viewer.min.js"></script>
+    <script src="./data.js"></script>
+    <script src="./script.js"></script>
+</body>
+</html> 
