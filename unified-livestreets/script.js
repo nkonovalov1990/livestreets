@@ -122,15 +122,30 @@ const renderMaps = () => {
 
 const loadMap = () => {
     const viewerImage = document.querySelector('.viewer-canvas img');
-    if (viewerImage) {
-        viewerImage.style.opacity = 0.2;
-        showLoader();
+    if (!viewerImage) {
+        console.error('Viewer image element not found');
+        return;
     }
-    viewerImage.src = currentMap.map;
-    viewerImage.onload = () => {
-        viewerImage.style.opacity = 1;
-        hideLoader();
+
+    viewerImage.style.opacity = 0.2;
+    showLoader();
+
+    // Создаем временное изображение для проверки загрузки
+    const tempImage = new Image();
+    tempImage.onload = () => {
+        viewerImage.src = currentMap.map;
+        viewerImage.onload = () => {
+            viewerImage.style.opacity = 1;
+            hideLoader();
+        };
     };
+    tempImage.onerror = () => {
+        console.error(`Failed to load image: ${currentMap.map}`);
+        hideLoader();
+        // Можно добавить визуальное уведомление об ошибке
+        viewerImage.style.opacity = 1;
+    };
+    tempImage.src = currentMap.map;
 };
 
 // Event Listeners
