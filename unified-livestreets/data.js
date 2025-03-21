@@ -28,13 +28,17 @@ const SETS = [
         title: 'Июль 2023',
         maps: [
             {
-                title: "Исходный проект",
-                map: "./images/jul-2023/Source_project.jpg",
+                title: "Исходная ситуация",
+                map: "./images/jul-2023/Tatishcheva-situaciya-min.jpg",
                 default: true
             },
             {
-                title: "Предложения",
-                map: "./images/jul-2023/Proposals.jpg"
+                title: "Проект планировки",
+                map: "./images/jul-2023/Tatishcheva-proekt-min.jpg"
+            },
+            {
+                title: "Предложения Живых улиц",
+                map: "./images/jul-2023/Tatishcheva-Predlozheniya-Zhivyh-ulic-min.jpg"
             }
         ]
     },
@@ -43,13 +47,21 @@ const SETS = [
         title: 'Декабрь 2024',
         maps: [
             {
-                title: "Исходный проект",
-                map: "./images/dec-2024/Source_project.jpg",
+                title: "Проект",
+                map: "./images/dec-2024/project.jpg",
                 default: true
             },
             {
-                title: "Предложения",
-                map: "./images/dec-2024/Proposals.jpg"
+                title: "План",
+                map: "./images/dec-2024/plan.jpg"
+            },
+            {
+                title: "Линии справа",
+                map: "./images/dec-2024/lines-right.jpg"
+            },
+            {
+                title: "Егоршинский",
+                map: "./images/dec-2024/egorshynsky.jpg"
             }
         ]
     }
