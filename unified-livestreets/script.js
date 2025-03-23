@@ -31,11 +31,16 @@ let currentSet = SETS.find(set => set.id === urlParams.setId) ||
                 SETS[0];
 let currentMap = currentSet.maps.find(map => map.default) || currentSet.maps[0];
 let viewer = null;
-let viewerState = {
+
+// Начальное состояние для нового набора карт
+const initialState = {
     zoom: 0.1,
     x: 0,
     y: 0
 };
+
+// Текущее состояние просмотрщика
+let viewerState = { ...initialState };
 
 // Utils
 const showLoader = () => loader.style.display = 'block';
@@ -49,13 +54,13 @@ const getScreenCenter = () => ({
 });
 
 // Initialize viewer
-const createViewer = (image, oldViewer = null) => {
+const createViewer = (image, oldViewer = null, shouldKeepState = true) => {
     const { innerHeight: windowHeight, innerWidth: windowWidth } = window;
     const maxSideSize = Math.max(windowWidth, windowHeight);
     const minZoomRatio = windowWidth > windowHeight ? 1 : 2;
 
-    if (oldViewer) {
-        // Сохраняем текущее состояние
+    // Сохраняем состояние только если это переключение внутри набора
+    if (oldViewer && shouldKeepState) {
         viewerState = {
             zoom: oldViewer.imageData.ratio,
             x: oldViewer.imageData.x,
@@ -103,7 +108,7 @@ const createViewer = (image, oldViewer = null) => {
             requestAnimationFrame(() => {
                 viewerImage.style.opacity = '1';
                 viewerImage.style.transition = 'opacity 0.3s ease-in-out';
-                hideLoaderText(); // Скрываем текст загрузки сразу при начале анимации
+                hideLoaderText();
                 
                 viewerImage.addEventListener('transitionend', () => {
                     // После появления новой карты удаляем старую
@@ -160,12 +165,12 @@ const renderMaps = () => {
 
 const loadMap = () => {
     showLoader();
-    showLoaderText(); // Показываем текст загрузки при начале загрузки новой карты
+    showLoaderText();
     
     // Создаем новое изображение
     const newImage = new Image();
     newImage.onload = () => {
-        // Сохраняем старый просмотрщик для плавного перехода внутри набора
+        // Сохраняем старый просмотрщик для плавного перехода
         const oldViewer = viewer;
         
         // Очищаем контейнер от всех изображений
@@ -174,14 +179,14 @@ const loadMap = () => {
         // Добавляем новое изображение
         mapContainer.appendChild(newImage);
         
-        // Создаем новый viewer, передавая старый для сохранения состояния
-        createViewer(newImage, oldViewer);
+        // Создаем новый viewer, указывая, нужно ли сохранять состояние
+        createViewer(newImage, oldViewer, true);
     };
     
     newImage.onerror = () => {
         console.error(`Failed to load image: ${currentMap.map}`);
         hideLoader();
-        hideLoaderText(); // Скрываем текст загрузки при ошибке
+        hideLoaderText();
     };
     
     newImage.src = currentMap.map;
@@ -189,11 +194,7 @@ const loadMap = () => {
 
 // Reset viewer state
 const resetViewerState = () => {
-    viewerState = {
-        zoom: 0.1,
-        x: 0,
-        y: 0
-    };
+    viewerState = { ...initialState };
 };
 
 // Event Listeners
@@ -206,9 +207,22 @@ setsSelect.addEventListener('change', (e) => {
     currentSet = SETS.find(set => set.id === e.target.value);
     currentMap = currentSet.maps.find(map => map.default) || currentSet.maps[0];
     updateUrlParams(currentSet.id);
-    resetViewerState(); // Сбрасываем состояние при смене набора
+    resetViewerState();
     renderMaps();
-    loadMap();
+    
+    // Загружаем карту с новым состоянием
+    const newImage = new Image();
+    newImage.onload = () => {
+        mapContainer.querySelectorAll('img').forEach(img => img.remove());
+        mapContainer.appendChild(newImage);
+        createViewer(newImage, null, false); // Не сохраняем состояние при смене набора
+    };
+    newImage.onerror = () => {
+        console.error(`Failed to load image: ${currentMap.map}`);
+        hideLoader();
+        hideLoaderText();
+    };
+    newImage.src = currentMap.map;
 });
 
 // Handle browser back/forward buttons
