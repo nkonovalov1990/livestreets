@@ -12,6 +12,14 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3
 
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+
+      - name: Generate data.js
+        run: node scripts/generate-data.js
+
       - name: Deploy
         uses: JamesIves/github-pages-deploy-action@v4
         with:
