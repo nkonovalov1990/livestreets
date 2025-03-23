@@ -54,19 +54,18 @@ mapImage.src = currentMap.map;
 mapContainer.appendChild(mapImage);
 
 // Initialize viewer
-const createViewer = (image) => {
+const createViewer = (image, oldViewer = null) => {
     const { innerHeight: windowHeight, innerWidth: windowWidth } = window;
     const maxSideSize = Math.max(windowWidth, windowHeight);
     const minZoomRatio = windowWidth > windowHeight ? 1 : 2;
 
-    if (viewer) {
-        // Сохраняем текущее состояние перед уничтожением
+    if (oldViewer) {
+        // Сохраняем текущее состояние
         viewerState = {
-            zoom: viewer.imageData.ratio,
-            x: viewer.imageData.x,
-            y: viewer.imageData.y
+            zoom: oldViewer.imageData.ratio,
+            x: oldViewer.imageData.x,
+            y: oldViewer.imageData.y
         };
-        viewer.destroy();
     }
 
     viewer = new Viewer(image, {
@@ -93,9 +92,12 @@ const createViewer = (image) => {
             showLoaderText();
         },
         viewed() {
-            image.style.display = 'none';
-            const viewerImage = document.querySelector('.viewer-canvas img');
+            // Удаляем оригинальное изображение после того, как просмотрщик создал свою копию
+            image.remove();
+            
+            const viewerImage = document.querySelector('.viewer-canvas img:last-child');
             viewerImage.style.willChange = 'transform, opacity';
+            viewerImage.style.opacity = '0';
             
             // Восстанавливаем состояние просмотра
             viewer.zoomTo(viewerState.zoom);
@@ -103,20 +105,26 @@ const createViewer = (image) => {
             
             viewer.isShown = false;
 
-            const showViewerImage = () => {
-                viewerImage.style.willChange = 'none';
-                viewerImage.style.opacity = 1;
-                viewer.options.transition = true;
-                hideLoaderText();
-            };
-
-            const loadingTimeout = setTimeout(showViewerImage, VIEWER_LOADING_TIMEOUT);
-            viewerImage.addEventListener('animationend', () => {
-                showViewerImage();
-                clearTimeout(loadingTimeout);
+            // Плавно показываем новое изображение
+            requestAnimationFrame(() => {
+                viewerImage.style.opacity = '1';
+                viewerImage.style.transition = 'opacity 0.3s ease-in-out';
+                
+                viewerImage.addEventListener('transitionend', () => {
+                    // После появления новой карты удаляем старую
+                    if (oldViewer) {
+                        oldViewer.destroy();
+                    }
+                    
+                    viewerImage.style.willChange = 'none';
+                    viewer.options.transition = true;
+                    hideLoaderText();
+                }, { once: true });
             });
         }
     });
+
+    return viewer;
 };
 
 // Navigation
@@ -162,17 +170,14 @@ const loadMap = () => {
     // Создаем новое изображение
     const newImage = new Image();
     newImage.onload = () => {
-        // Удаляем старое изображение если есть
-        const oldImage = mapContainer.querySelector('img');
-        if (oldImage) {
-            oldImage.remove();
-        }
+        // Сохраняем старый viewer для плавного перехода
+        const oldViewer = viewer;
         
         // Добавляем новое изображение
         mapContainer.appendChild(newImage);
         
         // Создаем новый viewer
-        createViewer(newImage);
+        createViewer(newImage, oldViewer);
     };
     
     newImage.onerror = () => {
