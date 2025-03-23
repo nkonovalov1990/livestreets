@@ -165,14 +165,14 @@ const loadMap = () => {
     // Создаем новое изображение
     const newImage = new Image();
     newImage.onload = () => {
-        // Сохраняем старый viewer для плавного перехода
-        const oldViewer = viewer;
+        // Очищаем контейнер от всех изображений
+        mapContainer.querySelectorAll('img').forEach(img => img.remove());
         
         // Добавляем новое изображение
         mapContainer.appendChild(newImage);
         
-        // Создаем новый viewer
-        createViewer(newImage, oldViewer);
+        // Создаем новый viewer (без передачи старого, так как он уже должен быть удален)
+        createViewer(newImage);
     };
     
     newImage.onerror = () => {
@@ -195,6 +195,11 @@ const resetViewerState = () => {
 
 // Event Listeners
 setsSelect.addEventListener('change', (e) => {
+    // Удаляем старый просмотрщик перед сменой набора
+    if (viewer) {
+        viewer.destroy();
+        viewer = null;
+    }
     currentSet = SETS.find(set => set.id === e.target.value);
     currentMap = currentSet.maps.find(map => map.default) || currentSet.maps[0];
     updateUrlParams(currentSet.id);
@@ -207,6 +212,11 @@ setsSelect.addEventListener('change', (e) => {
 window.addEventListener('popstate', () => {
     const { setId } = getUrlParams();
     if (setId && setId !== currentSet.id) {
+        // Удаляем старый просмотрщик перед сменой набора
+        if (viewer) {
+            viewer.destroy();
+            viewer = null;
+        }
         currentSet = SETS.find(set => set.id === setId) || currentSet;
         currentMap = currentSet.maps.find(map => map.default) || currentSet.maps[0];
         resetViewerState(); // Сбрасываем состояние при навигации
