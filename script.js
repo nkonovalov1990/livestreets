@@ -68,11 +68,17 @@ const createViewer = (image) => {
         viewer = null;
     }
 
-    // Очищаем все старые контейнеры просмотрщика
-    const oldContainers = document.querySelectorAll('.viewer-container');
-    oldContainers.forEach(container => {
+    // Очищаем все старые контейнеры просмотрщика и изображения
+    document.querySelectorAll('.viewer-container').forEach(container => {
         if (container && container.parentNode) {
             container.parentNode.removeChild(container);
+        }
+    });
+    
+    // Очищаем все изображения в контейнере карты
+    mapContainer.querySelectorAll('img:not(:last-child)').forEach(img => {
+        if (img !== image) {
+            img.remove();
         }
     });
 
@@ -169,10 +175,16 @@ const loadMap = () => {
     showLoader();
     showLoaderText();
 
+    // Очищаем все существующие изображения перед загрузкой нового
+    mapContainer.querySelectorAll('img').forEach(img => img.remove());
+    
     const image = new Image();
     image.src = currentMap.map;
     image.onload = () => {
-        // Добавляем изображение в DOM
+        // Очищаем контейнер еще раз перед добавлением нового изображения
+        mapContainer.querySelectorAll('img').forEach(img => img.remove());
+        
+        // Добавляем новое изображение
         mapContainer.appendChild(image);
         image.style.opacity = '0';
         image.style.transition = 'opacity 0.3s ease-in-out';
