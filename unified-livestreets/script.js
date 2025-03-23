@@ -31,6 +31,11 @@ let currentSet = SETS.find(set => set.id === urlParams.setId) ||
                 SETS[0];
 let currentMap = currentSet.maps.find(map => map.default) || currentSet.maps[0];
 let viewer = null;
+let viewerState = {
+    zoom: 0.1,
+    x: 0,
+    y: -window.innerHeight / 2
+};
 
 // Utils
 const showLoader = () => loader.style.display = 'block';
@@ -55,6 +60,12 @@ const createViewer = (image) => {
     const minZoomRatio = windowWidth > windowHeight ? 1 : 2;
 
     if (viewer) {
+        // Сохраняем текущее состояние перед уничтожением
+        viewerState = {
+            zoom: viewer.imageData.ratio,
+            x: viewer.imageData.x,
+            y: viewer.imageData.y
+        };
         viewer.destroy();
     }
 
@@ -85,7 +96,11 @@ const createViewer = (image) => {
             image.style.display = 'none';
             const viewerImage = document.querySelector('.viewer-canvas img');
             viewerImage.style.willChange = 'transform, opacity';
-            viewer.zoomTo(0.1);
+            
+            // Восстанавливаем состояние просмотра
+            viewer.zoomTo(viewerState.zoom);
+            viewer.moveTo(viewerState.x, viewerState.y);
+            
             viewer.isShown = false;
 
             const showViewerImage = () => {
@@ -168,11 +183,21 @@ const loadMap = () => {
     newImage.src = currentMap.map;
 };
 
+// Reset viewer state
+const resetViewerState = () => {
+    viewerState = {
+        zoom: 0.1,
+        x: 0,
+        y: -window.innerHeight / 2
+    };
+};
+
 // Event Listeners
 setsSelect.addEventListener('change', (e) => {
     currentSet = SETS.find(set => set.id === e.target.value);
     currentMap = currentSet.maps.find(map => map.default) || currentSet.maps[0];
     updateUrlParams(currentSet.id);
+    resetViewerState(); // Сбрасываем состояние при смене набора
     renderMaps();
     loadMap();
 });
@@ -183,6 +208,7 @@ window.addEventListener('popstate', () => {
     if (setId && setId !== currentSet.id) {
         currentSet = SETS.find(set => set.id === setId) || currentSet;
         currentMap = currentSet.maps.find(map => map.default) || currentSet.maps[0];
+        resetViewerState(); // Сбрасываем состояние при навигации
         renderSets();
         renderMaps();
         loadMap();
@@ -224,8 +250,9 @@ document.addEventListener('keyup', ({ shiftKey, key }) => {
             break;
         case 'Escape':
         case '0':
-            viewer.zoomTo(0.1);
-            viewer.moveTo(0, -window.innerHeight / 2);
+            resetViewerState();
+            viewer.zoomTo(viewerState.zoom);
+            viewer.moveTo(viewerState.x, viewerState.y);
             break;
     }
 });
