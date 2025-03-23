@@ -178,11 +178,37 @@ const renderMaps = () => {
         const button = document.createElement('button');
         button.className = `map-button${map === currentMap ? ' active' : ''}`;
         button.textContent = map.title;
+        button.dataset.map = map.map;
         button.addEventListener('click', () => {
             if (map !== currentMap) {
+                // Сохраняем состояние до обновления currentMap
+                const state = viewer ? {
+                    zoom: viewer.imageData.ratio,
+                    x: viewer.imageData.x,
+                    y: viewer.imageData.y
+                } : null;
+                
                 currentMap = map;
-                loadMap();
-                updateMapButtons();
+                
+                // Загружаем новое изображение
+                const image = new Image();
+                image.src = currentMap.map;
+                image.onload = () => {
+                    // Создаем новый просмотрщик с сохраненным состоянием
+                    if (state) {
+                        viewerState = state;
+                    }
+                    createViewer(image, true);
+                    updateMapButtons();
+                };
+                image.onerror = () => {
+                    hideLoader();
+                    hideLoaderText();
+                    console.error('Failed to load image:', currentMap.map);
+                };
+                
+                showLoader();
+                showLoaderText();
             }
         });
         mapsList.appendChild(button);
