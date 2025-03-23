@@ -34,7 +34,7 @@ let viewer = null;
 let viewerState = {
     zoom: 0.1,
     x: 0,
-    y: -window.innerHeight / 2
+    y: 0
 };
 
 // Utils
@@ -189,7 +189,7 @@ const resetViewerState = () => {
     viewerState = {
         zoom: 0.1,
         x: 0,
-        y: -window.innerHeight / 2
+        y: 0
     };
 };
 
