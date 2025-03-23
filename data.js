@@ -39,9 +39,19 @@ const SETS = [
         "default": false,
         "maps": [
             {
+                "title": "Проект",
+                "map": "/images/24-04-amundsena-bypass/project.jpg",
+                "default": true
+            },
+            {
                 "title": "Предложения 2023",
                 "map": "/images/24-04-amundsena-bypass/proposals_2023.jpg",
-                "default": true
+                "default": false
+            },
+            {
+                "title": "Предложения 2024",
+                "map": "/images/24-04-amundsena-bypass/proposals_2024.jpg",
+                "default": false
             },
             {
                 "title": "Предложения 2024 без БРТ",
@@ -61,6 +71,11 @@ const SETS = [
                 "default": true
             },
             {
+                "title": "Предложения Живых улиц",
+                "map": "/images/23-07-tatischeva/living_streets_proposals.jpg",
+                "default": false
+            },
+            {
                 "title": "Проект",
                 "map": "/images/23-07-tatischeva/project.jpg",
                 "default": false
@@ -78,6 +93,11 @@ const SETS = [
                 "default": true
             },
             {
+                "title": "Предложения Живых улиц",
+                "map": "/images/23-04-amundsena-bypass/living_streets_proposals.jpg",
+                "default": false
+            },
+            {
                 "title": "Проект",
                 "map": "/images/23-04-amundsena-bypass/project.jpg",
                 "default": false
@@ -93,6 +113,11 @@ const SETS = [
                 "title": "Предложения Живых улиц",
                 "map": "/images/23-02-naberezhnaya-iseti/living_streets_proposals.jpg",
                 "default": true
+            },
+            {
+                "title": "Проект",
+                "map": "/images/23-02-naberezhnaya-iseti/project.jpg",
+                "default": false
             }
         ]
     }
