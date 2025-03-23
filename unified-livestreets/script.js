@@ -49,12 +49,16 @@ mapImage.src = currentMap.map;
 mapContainer.appendChild(mapImage);
 
 // Initialize viewer
-const initializeViewer = () => {
+const createViewer = (image) => {
     const { innerHeight: windowHeight, innerWidth: windowWidth } = window;
     const maxSideSize = Math.max(windowWidth, windowHeight);
     const minZoomRatio = windowWidth > windowHeight ? 1 : 2;
 
-    viewer = new Viewer(mapImage, {
+    if (viewer) {
+        viewer.destroy();
+    }
+
+    viewer = new Viewer(image, {
         title: false,
         navbar: false,
         backdrop: false,
@@ -78,21 +82,21 @@ const initializeViewer = () => {
             showLoaderText();
         },
         viewed() {
-            mapImage.style.display = 'none';
-            const image = document.querySelector('.viewer-canvas img');
-            image.style.willChange = 'transform, opacity';
+            image.style.display = 'none';
+            const viewerImage = document.querySelector('.viewer-canvas img');
+            viewerImage.style.willChange = 'transform, opacity';
             viewer.zoomTo(0.1);
             viewer.isShown = false;
 
             const showViewerImage = () => {
-                image.style.willChange = 'none';
-                image.style.opacity = 1;
+                viewerImage.style.willChange = 'none';
+                viewerImage.style.opacity = 1;
                 viewer.options.transition = true;
                 hideLoaderText();
             };
 
             const loadingTimeout = setTimeout(showViewerImage, VIEWER_LOADING_TIMEOUT);
-            image.addEventListener('animationend', () => {
+            viewerImage.addEventListener('animationend', () => {
                 showViewerImage();
                 clearTimeout(loadingTimeout);
             });
@@ -138,31 +142,30 @@ const renderMaps = () => {
 };
 
 const loadMap = () => {
-    const viewerImage = document.querySelector('.viewer-canvas img');
-    if (!viewerImage) {
-        console.error('Viewer image element not found');
-        return;
-    }
-
-    viewerImage.style.opacity = 0.2;
     showLoader();
-
-    // Создаем временное изображение для проверки загрузки
-    const tempImage = new Image();
-    tempImage.onload = () => {
-        viewerImage.src = currentMap.map;
-        viewerImage.onload = () => {
-            viewerImage.style.opacity = 1;
-            hideLoader();
-        };
+    
+    // Создаем новое изображение
+    const newImage = new Image();
+    newImage.onload = () => {
+        // Удаляем старое изображение если есть
+        const oldImage = mapContainer.querySelector('img');
+        if (oldImage) {
+            oldImage.remove();
+        }
+        
+        // Добавляем новое изображение
+        mapContainer.appendChild(newImage);
+        
+        // Создаем новый viewer
+        createViewer(newImage);
     };
-    tempImage.onerror = () => {
+    
+    newImage.onerror = () => {
         console.error(`Failed to load image: ${currentMap.map}`);
         hideLoader();
-        // Можно добавить визуальное уведомление об ошибке
-        viewerImage.style.opacity = 1;
     };
-    tempImage.src = currentMap.map;
+    
+    newImage.src = currentMap.map;
 };
 
 // Event Listeners
@@ -229,7 +232,12 @@ document.addEventListener('keyup', ({ shiftKey, key }) => {
 
 // Initialize
 window.addEventListener('DOMContentLoaded', () => {
-    initializeViewer();
-    renderSets();
-    renderMaps();
+    const initialImage = new Image();
+    initialImage.onload = () => {
+        mapContainer.appendChild(initialImage);
+        createViewer(initialImage);
+        renderSets();
+        renderMaps();
+    };
+    initialImage.src = currentMap.map;
 }); 
