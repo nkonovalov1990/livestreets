@@ -48,11 +48,6 @@ const getScreenCenter = () => ({
     pageY: window.innerHeight / 2
 });
 
-// Initialize map image
-const mapImage = new Image();
-mapImage.src = currentMap.map;
-mapContainer.appendChild(mapImage);
-
 // Initialize viewer
 const createViewer = (image, oldViewer = null) => {
     const { innerHeight: windowHeight, innerWidth: windowWidth } = window;
@@ -89,7 +84,6 @@ const createViewer = (image, oldViewer = null) => {
         minZoomRatio: 0.1,
         ready() {
             hideLoader();
-            showLoaderText();
         },
         viewed() {
             // Удаляем оригинальное изображение после того, как просмотрщик создал свою копию
@@ -109,6 +103,7 @@ const createViewer = (image, oldViewer = null) => {
             requestAnimationFrame(() => {
                 viewerImage.style.opacity = '1';
                 viewerImage.style.transition = 'opacity 0.3s ease-in-out';
+                hideLoaderText(); // Скрываем текст загрузки сразу при начале анимации
                 
                 viewerImage.addEventListener('transitionend', () => {
                     // После появления новой карты удаляем старую
@@ -118,7 +113,6 @@ const createViewer = (image, oldViewer = null) => {
                     
                     viewerImage.style.willChange = 'none';
                     viewer.options.transition = true;
-                    hideLoaderText();
                 }, { once: true });
             });
         }
@@ -166,6 +160,7 @@ const renderMaps = () => {
 
 const loadMap = () => {
     showLoader();
+    showLoaderText(); // Показываем текст загрузки при начале загрузки новой карты
     
     // Создаем новое изображение
     const newImage = new Image();
@@ -183,6 +178,7 @@ const loadMap = () => {
     newImage.onerror = () => {
         console.error(`Failed to load image: ${currentMap.map}`);
         hideLoader();
+        hideLoaderText(); // Скрываем текст загрузки при ошибке
     };
     
     newImage.src = currentMap.map;
@@ -264,6 +260,9 @@ document.addEventListener('keyup', ({ shiftKey, key }) => {
 
 // Initialize
 window.addEventListener('DOMContentLoaded', () => {
+    showLoader();
+    showLoaderText();
+    
     const initialImage = new Image();
     initialImage.onload = () => {
         mapContainer.appendChild(initialImage);
