@@ -68,17 +68,10 @@ const createViewer = (image) => {
         viewer = null;
     }
 
-    // Очищаем все старые контейнеры просмотрщика и изображения
+    // Очищаем все старые контейнеры просмотрщика
     document.querySelectorAll('.viewer-container').forEach(container => {
         if (container && container.parentNode) {
             container.parentNode.removeChild(container);
-        }
-    });
-    
-    // Очищаем все изображения в контейнере карты
-    mapContainer.querySelectorAll('img:not(:last-child)').forEach(img => {
-        if (img !== image) {
-            img.remove();
         }
     });
 
@@ -98,12 +91,22 @@ const createViewer = (image) => {
         fullscreen: false,
         keyboard: true,
         container: mapContainer,
-        ready() {
+        viewed() {
+            // Находим изображение, созданное viewer.js
+            const viewerImage = document.querySelector('.viewer-canvas img');
+            if (viewerImage) {
+                // Настраиваем плавное появление
+                viewerImage.style.opacity = '0';
+                viewerImage.style.transition = 'opacity 0.3s ease-in-out';
+                
+                requestAnimationFrame(() => {
+                    viewerImage.style.opacity = '1';
+                });
+            }
+            
             // Устанавливаем начальное состояние
             viewer.zoomTo(viewerState.zoom);
             viewer.moveTo(viewerState.x, viewerState.y);
-            hideLoader();
-            hideLoaderText();
         }
     });
 };
@@ -175,29 +178,13 @@ const loadMap = () => {
     showLoader();
     showLoaderText();
 
-    // Очищаем все существующие изображения перед загрузкой нового
-    mapContainer.querySelectorAll('img').forEach(img => img.remove());
-    
     const image = new Image();
     image.src = currentMap.map;
     image.onload = () => {
-        // Очищаем контейнер еще раз перед добавлением нового изображения
-        mapContainer.querySelectorAll('img').forEach(img => img.remove());
-        
-        // Добавляем новое изображение
-        mapContainer.appendChild(image);
-        image.style.opacity = '0';
-        image.style.transition = 'opacity 0.3s ease-in-out';
-        
-        // Создаем новый просмотрщик
+        // Создаем новый просмотрщик без добавления изображения в DOM
         createViewer(image);
-        
-        // Плавно показываем новое изображение
-        requestAnimationFrame(() => {
-            image.style.opacity = '1';
-            hideLoader();
-            hideLoaderText();
-        });
+        hideLoader();
+        hideLoaderText();
     };
     image.onerror = () => {
         hideLoader();

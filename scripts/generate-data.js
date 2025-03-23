@@ -1,19 +1,27 @@
 const fs = require('fs');
 const path = require('path');
 
+// Конфигурация названий наборов
+const SET_TITLES = {
+    '24-12-malysheva-egorshinsky': '24-12 Малышева-Егоршинский подход',
+    '24-04-amundsena-bypass': '24-04 Амундсена объездная',
+    '23-07-tatischeva': '23-07 Татищева',
+    '23-04-amundsena-bypass': '23-04 Амундсена объездная',
+    '23-02-naberezhnaya-iseti': '23-02 Набережная Исети'
+};
+
 // Конфигурация названий карт (если имя файла соответствует определенному паттерну)
 const MAP_TITLES = {
-    'Source_project': 'Исходный проект',
-    'Proposals_2024': 'Предложения 2024',
-    'Proposals_2024_without_BRT': 'Предложения 2024 без БРТ',
-    'Project_planning_2023': 'Проект планировки 2023',
+    'initial_situation': 'Исходная ситуация',
+    'current_situation': 'Исходная ситуация',
+    'dedicated_lanes_right': 'Выделенки справа',
+    'exits_to_egorshinsky': 'Съезды на Егоршинский',
+    'living_streets_proposals': 'Предложения Живых улиц',
+    'proposals_2023': 'Предложения 2023',
+    'proposals_2024': 'Предложения 2024',
+    'proposals_2024_without_brt': 'Предложения 2024 без БРТ',
     'project': 'Проект',
-    'plan': 'План',
-    'lines-right': 'Линии справа',
-    'egorshynsky': 'Егоршинский',
-    'Tatishcheva-situaciya-min': 'Исходная ситуация',
-    'Tatishcheva-proekt-min': 'Проект планировки',
-    'Tatishcheva-Predlozheniya-Zhivyh-ulic-min': 'Предложения Живых улиц'
+    'planning_project': 'Проект планировки'
 };
 
 // Функция для нормализации русских символов в пути
@@ -49,29 +57,26 @@ function scanImagesDirectory() {
 
     console.log('Found directories:', setDirs);
 
-    setDirs.forEach((setDir, index) => {
-        const setPath = path.join(imagesDir, setDir);
+    setDirs.forEach(setDir => {
         console.log('Processing directory:', setDir);
-
+        const setPath = path.join(imagesDir, setDir);
         const images = fs.readdirSync(setPath)
-            .filter(file => /\.(jpg|jpeg|png)$/i.test(file))
-            .sort();
+            .filter(file => file.toLowerCase().endsWith('.jpg') || file.toLowerCase().endsWith('.jpeg') || file.toLowerCase().endsWith('.png'));
 
         console.log('Found images:', images);
 
         if (images.length > 0) {
-            const maps = images.map((image, imageIndex) => ({
-                title: getTitleFromFilename(image),
-                map: `/images/${normalizePathComponent(setDir)}/${normalizePathComponent(image)}`,
-                default: imageIndex === 0 // Первое изображение будет default
-            }));
-
-            sets.push({
+            const set = {
                 id: setDir,
-                title: setDir,
-                default: index === 0, // Первый набор будет default
-                maps
-            });
+                title: SET_TITLES[setDir] || setDir, // Используем русское название из конфигурации
+                default: setDir === setDirs[0],
+                maps: images.map(image => ({
+                    title: getTitleFromFilename(image),
+                    map: `/images/${normalizePathComponent(setDir)}/${normalizePathComponent(image)}`,
+                    default: image === images[0]
+                }))
+            };
+            sets.push(set);
         }
     });
 
