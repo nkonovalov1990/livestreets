@@ -165,14 +165,17 @@ const loadMap = () => {
     // Создаем новое изображение
     const newImage = new Image();
     newImage.onload = () => {
+        // Сохраняем старый просмотрщик для плавного перехода внутри набора
+        const oldViewer = viewer;
+        
         // Очищаем контейнер от всех изображений
         mapContainer.querySelectorAll('img').forEach(img => img.remove());
         
         // Добавляем новое изображение
         mapContainer.appendChild(newImage);
         
-        // Создаем новый viewer (без передачи старого, так как он уже должен быть удален)
-        createViewer(newImage);
+        // Создаем новый viewer, передавая старый для сохранения состояния
+        createViewer(newImage, oldViewer);
     };
     
     newImage.onerror = () => {
