@@ -68,6 +68,13 @@ const createViewer = (image, oldViewer = null, shouldKeepState = true) => {
         };
     }
 
+    // Очищаем все старые элементы просмотрщика
+    document.querySelectorAll('.viewer-container').forEach(container => {
+        if (container !== oldViewer?.container) {
+            container.remove();
+        }
+    });
+
     viewer = new Viewer(image, {
         title: false,
         navbar: false,
@@ -112,16 +119,19 @@ const createViewer = (image, oldViewer = null, shouldKeepState = true) => {
                 
                 // Если есть старый просмотрщик, начинаем его плавное скрытие
                 if (oldViewer) {
-                    const oldViewerImage = document.querySelector('.viewer-canvas img:first-child');
+                    const oldViewerContainer = oldViewer.container;
+                    const oldViewerImage = oldViewerContainer.querySelector('.viewer-canvas img');
                     if (oldViewerImage) {
                         oldViewerImage.style.transition = 'opacity 0.3s ease-in-out';
                         oldViewerImage.style.opacity = '0';
                         
                         oldViewerImage.addEventListener('transitionend', () => {
                             oldViewer.destroy();
+                            oldViewerContainer.remove();
                         }, { once: true });
                     } else {
                         oldViewer.destroy();
+                        oldViewerContainer.remove();
                     }
                 }
                 
