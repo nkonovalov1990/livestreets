@@ -26,8 +26,29 @@ const MAP_TITLES = {
 
 // Функция для нормализации имени директории
 function normalizeDirectoryName(dirName) {
-    // Заменяем пробелы и специальные символы на дефисы
-    return dirName.replace(/[\s\/\\]/g, '-').toLowerCase();
+    // Транслитерация русских букв
+    const translitMap = {
+        'а': 'a', 'б': 'b', 'в': 'v', 'г': 'g', 'д': 'd', 'е': 'e', 'ё': 'e',
+        'ж': 'zh', 'з': 'z', 'и': 'i', 'й': 'y', 'к': 'k', 'л': 'l', 'м': 'm',
+        'н': 'n', 'о': 'o', 'п': 'p', 'р': 'r', 'с': 's', 'т': 't', 'у': 'u',
+        'ф': 'f', 'х': 'h', 'ц': 'ts', 'ч': 'ch', 'ш': 'sh', 'щ': 'sch',
+        'ъ': '', 'ы': 'y', 'ь': '', 'э': 'e', 'ю': 'yu', 'я': 'ya',
+        'А': 'A', 'Б': 'B', 'В': 'V', 'Г': 'G', 'Д': 'D', 'Е': 'E', 'Ё': 'E',
+        'Ж': 'Zh', 'З': 'Z', 'И': 'I', 'Й': 'Y', 'К': 'K', 'Л': 'L', 'М': 'M',
+        'Н': 'N', 'О': 'O', 'П': 'P', 'Р': 'R', 'С': 'S', 'Т': 'T', 'У': 'U',
+        'Ф': 'F', 'Х': 'H', 'Ц': 'Ts', 'Ч': 'Ch', 'Ш': 'Sh', 'Щ': 'Sch',
+        'Ъ': '', 'Ы': 'Y', 'Ь': '', 'Э': 'E', 'Ю': 'Yu', 'Я': 'Ya'
+    };
+
+    return dirName
+        .split('')
+        .map(char => translitMap[char] || char) // транслитерация
+        .join('')
+        .replace(/[\s\/\\]/g, '-') // заменяем пробелы и слеши на дефисы
+        .replace(/[^a-zA-Z0-9-]/g, '') // оставляем только латиницу, цифры и дефисы
+        .replace(/-+/g, '-') // заменяем множественные дефисы на один
+        .replace(/^-|-$/g, '') // удаляем дефисы в начале и конце
+        .toLowerCase();
 }
 
 // Функция для получения человекочитаемого названия из имени файла
@@ -46,17 +67,31 @@ function scanImagesDirectory() {
     const imagesDir = path.join(__dirname, '..', 'images');
     const sets = [];
 
+    console.log('Scanning directory:', imagesDir);
+
     // Получаем список поддиректорий (наборов)
     const setDirs = fs.readdirSync(imagesDir)
-        .filter(file => fs.statSync(path.join(imagesDir, file)).isDirectory())
+        .filter(file => {
+            const fullPath = path.join(imagesDir, file);
+            const isDir = fs.statSync(fullPath).isDirectory();
+            console.log('Found:', file, 'isDirectory:', isDir);
+            return isDir;
+        })
         .sort((a, b) => b.localeCompare(a)); // Сортируем в обратном порядке, чтобы новые были вверху
+
+    console.log('Found directories:', setDirs);
 
     setDirs.forEach((setDir, index) => {
         const setPath = path.join(imagesDir, setDir);
         const normalizedDirName = normalizeDirectoryName(setDir);
+        console.log('Processing directory:', setDir);
+        console.log('Normalized name:', normalizedDirName);
+
         const images = fs.readdirSync(setPath)
             .filter(file => /\.(jpg|jpeg|png)$/i.test(file))
             .sort();
+
+        console.log('Found images:', images);
 
         if (images.length > 0) {
             const maps = images.map((image, imageIndex) => ({
@@ -74,6 +109,7 @@ function scanImagesDirectory() {
         }
     });
 
+    console.log('Generated sets:', JSON.stringify(sets, null, 2));
     return sets;
 }
 

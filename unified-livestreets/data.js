@@ -1,68 +1,95 @@
 const SETS = [
     {
-        id: 'apr-2024',
-        title: 'Апрель 2024',
-        default: true,
-        maps: [
+        "id": "jul-2023",
+        "title": "Июль 2023",
+        "default": true,
+        "maps": [
             {
-                title: "Исходный проект",
-                map: "./images/apr-2024/Source_project.jpg",
-                default: true
+                "title": "Предложения Живых улиц",
+                "map": "./images/jul-2023/Tatishcheva-Predlozheniya-Zhivyh-ulic-min.jpg",
+                "default": true
             },
             {
-                title: "Предложения 2024",
-                map: "./images/apr-2024/Proposals_2024.jpg"
+                "title": "Проект планировки",
+                "map": "./images/jul-2023/Tatishcheva-proekt-min.jpg",
+                "default": false
             },
             {
-                title: "Предложения 2024 без БРТ",
-                map: "./images/apr-2024/Proposals_2024_without_BRT.jpg"
-            },
-            {
-                title: "Проект планировки 2023",
-                map: "./images/apr-2024/Project_planning_2023.jpg"
+                "title": "Исходная ситуация",
+                "map": "./images/jul-2023/Tatishcheva-situaciya-min.jpg",
+                "default": false
             }
         ]
     },
     {
-        id: 'jul-2023',
-        title: 'Июль 2023',
-        maps: [
+        "id": "dec-2024",
+        "title": "Декабрь 2024",
+        "default": false,
+        "maps": [
             {
-                title: "Исходная ситуация",
-                map: "./images/jul-2023/Tatishcheva-situaciya-min.jpg",
-                default: true
+                "title": "Егоршинский",
+                "map": "./images/dec-2024/egorshynsky.jpg",
+                "default": true
             },
             {
-                title: "Проект планировки",
-                map: "./images/jul-2023/Tatishcheva-proekt-min.jpg"
+                "title": "Линии справа",
+                "map": "./images/dec-2024/lines-right.jpg",
+                "default": false
             },
             {
-                title: "Предложения Живых улиц",
-                map: "./images/jul-2023/Tatishcheva-Predlozheniya-Zhivyh-ulic-min.jpg"
+                "title": "План",
+                "map": "./images/dec-2024/plan.jpg",
+                "default": false
+            },
+            {
+                "title": "Проект",
+                "map": "./images/dec-2024/project.jpg",
+                "default": false
             }
         ]
     },
     {
-        id: 'dec-2024',
-        title: 'Декабрь 2024',
-        maps: [
+        "id": "apr-2024",
+        "title": "Апрель 2024",
+        "default": false,
+        "maps": [
             {
-                title: "Проект",
-                map: "./images/dec-2024/project.jpg",
-                default: true
+                "title": "Проект планировки 2023",
+                "map": "./images/apr-2024/Project_planning_2023.jpg",
+                "default": true
             },
             {
-                title: "План",
-                map: "./images/dec-2024/plan.jpg"
+                "title": "Предложения 2024",
+                "map": "./images/apr-2024/Proposals_2024.jpg",
+                "default": false
             },
             {
-                title: "Линии справа",
-                map: "./images/dec-2024/lines-right.jpg"
+                "title": "Предложения 2024 без БРТ",
+                "map": "./images/apr-2024/Proposals_2024_without_BRT.jpg",
+                "default": false
             },
             {
-                title: "Егоршинский",
-                map: "./images/dec-2024/egorshynsky.jpg"
+                "title": "Исходный проект",
+                "map": "./images/apr-2024/Source_project.jpg",
+                "default": false
+            }
+        ]
+    },
+    {
+        "id": "23-03-test",
+        "title": "Март 2023 Тест",
+        "default": false,
+        "maps": [
+            {
+                "title": "Тест 1",
+                "map": "./images/23-03%20%D0%A2%D0%B5%D1%81%D1%82/%D0%A2%D0%B5%D1%81%D1%82%201.jpg",
+                "default": true
+            },
+            {
+                "title": "Тест 2",
+                "map": "./images/23-03%20%D0%A2%D0%B5%D1%81%D1%82/%D0%A2%D0%B5%D1%81%D1%82%202.jpg",
+                "default": false
             }
         ]
     }
-]; 
+];
