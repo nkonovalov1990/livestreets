@@ -91,6 +91,11 @@ const createViewer = (image) => {
         fullscreen: false,
         keyboard: true,
         container: mapContainer,
+        ready() {
+            // Скрываем индикатор загрузки как только просмотрщик готов
+            hideLoader();
+            hideLoaderText();
+        },
         viewed() {
             // Находим изображение, созданное viewer.js
             const viewerImage = document.querySelector('.viewer-canvas img');
@@ -172,6 +177,8 @@ const loadMap = () => {
             viewer.destroy();
             viewer = null;
         }
+        hideLoader();
+        hideLoaderText();
         return;
     }
 
@@ -183,8 +190,7 @@ const loadMap = () => {
     image.onload = () => {
         // Создаем новый просмотрщик без добавления изображения в DOM
         createViewer(image);
-        hideLoader();
-        hideLoaderText();
+        // Индикатор загрузки скрывается в событии ready просмотрщика
     };
     image.onerror = () => {
         hideLoader();
@@ -211,19 +217,15 @@ setsSelect.addEventListener('change', (e) => {
     resetViewerState();
     renderMaps();
     
-    // Загружаем карту с новым состоянием
-    const newImage = new Image();
-    newImage.onload = () => {
-        mapContainer.querySelectorAll('img').forEach(img => img.remove());
-        mapContainer.appendChild(newImage);
-        createViewer(newImage, null, false); // Не сохраняем состояние при смене набора
-    };
-    newImage.onerror = () => {
-        console.error(`Failed to load image: ${currentMap.map}`);
+    if (!currentMap) {
         hideLoader();
         hideLoaderText();
-    };
-    newImage.src = currentMap.map;
+        return;
+    }
+    
+    showLoader();
+    showLoaderText();
+    loadMap();
 });
 
 // Handle browser back/forward buttons
@@ -288,9 +290,6 @@ document.addEventListener('keyup', ({ shiftKey, key }) => {
 
 // Initialize
 window.addEventListener('DOMContentLoaded', () => {
-    showLoader();
-    showLoaderText();
-    
     renderSets();
     renderMaps();
 
@@ -300,15 +299,7 @@ window.addEventListener('DOMContentLoaded', () => {
         return;
     }
     
-    const initialImage = new Image();
-    initialImage.onload = () => {
-        mapContainer.appendChild(initialImage);
-        createViewer(initialImage);
-    };
-    initialImage.onerror = () => {
-        hideLoader();
-        hideLoaderText();
-        console.error('Failed to load initial image:', currentMap.map);
-    };
-    initialImage.src = currentMap.map;
+    showLoader();
+    showLoaderText();
+    loadMap();
 }); 
