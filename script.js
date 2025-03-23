@@ -60,9 +60,9 @@ const createViewer = (image, shouldKeepState = true) => {
     let previousState = null;
     if (viewer && shouldKeepState) {
         previousState = {
-            zoom: viewer.zoomRatio,
-            x: viewer.viewer.translateX,
-            y: viewer.viewer.translateY
+            zoom: viewer.imageData.ratio,
+            x: viewer.imageData.x,
+            y: viewer.imageData.y
         };
     }
 
@@ -123,12 +123,12 @@ const createViewer = (image, shouldKeepState = true) => {
             // Устанавливаем состояние просмотрщика
             if (previousState && shouldKeepState) {
                 // Используем сохраненное состояние предыдущего просмотрщика
-                viewer.zoomTo(previousState.zoom);
                 viewer.moveTo(previousState.x, previousState.y);
+                viewer.zoomTo(previousState.zoom);
             } else {
                 // Используем начальное состояние
-                viewer.zoomTo(viewerState.zoom);
                 viewer.moveTo(viewerState.x, viewerState.y);
+                viewer.zoomTo(viewerState.zoom);
             }
         }
     });
