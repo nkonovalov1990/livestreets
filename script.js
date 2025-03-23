@@ -55,99 +55,51 @@ const getScreenCenter = () => ({
 });
 
 // Initialize viewer
-const createViewer = (image, oldViewer = null, shouldKeepState = true) => {
-    const { innerHeight: windowHeight, innerWidth: windowWidth } = window;
-    const maxSideSize = Math.max(windowWidth, windowHeight);
-    const minZoomRatio = windowWidth > windowHeight ? 1 : 2;
-
-    // Сохраняем состояние только если это переключение внутри набора
-    if (oldViewer && shouldKeepState) {
+const createViewer = (image) => {
+    // Очищаем старый просмотрщик
+    if (viewer) {
+        // Сохраняем состояние перед удалением
         viewerState = {
-            zoom: oldViewer.imageData.ratio,
-            x: oldViewer.imageData.x,
-            y: oldViewer.imageData.y
+            zoom: viewer.zoomRatio,
+            x: viewer.viewer.translateX,
+            y: viewer.viewer.translateY
         };
+        viewer.destroy();
+        viewer = null;
     }
 
-    // Очищаем все старые элементы просмотрщика
-    document.querySelectorAll('.viewer-container').forEach(container => {
-        if (container !== oldViewer?.container) {
-            container.remove();
+    // Очищаем все старые контейнеры просмотрщика
+    const oldContainers = document.querySelectorAll('.viewer-container');
+    oldContainers.forEach(container => {
+        if (container && container.parentNode) {
+            container.parentNode.removeChild(container);
         }
     });
 
+    // Создаем новый просмотрщик
     viewer = new Viewer(image, {
-        title: false,
-        navbar: false,
-        backdrop: false,
-        toolbar: false,
-        fullscreen: false,
-        button: false,
         inline: true,
-        keyboard: false,
-        zIndexInline: 1,
+        backdrop: false,
+        navbar: false,
+        title: false,
+        toolbar: false,
+        tooltip: false,
+        movable: true,
+        zoomable: true,
         rotatable: false,
         scalable: false,
-        toggleOnDblclick: false,
-        slideOnTouch: false,
-        tooltip: false,
         transition: false,
-        zoomRatio: VIEWER_ZOOM_RATIO,
-        maxZoomRatio: PLAN_SIZE_MAXIMIZED / maxSideSize,
-        minZoomRatio: 0.1,
+        fullscreen: false,
+        keyboard: true,
+        container: mapContainer,
         ready() {
-            hideLoader();
-        },
-        viewed() {
-            // Удаляем оригинальное изображение после того, как просмотрщик создал свою копию
-            image.remove();
-            
-            const viewerImage = document.querySelector('.viewer-canvas img:last-child');
-            viewerImage.style.willChange = 'transform, opacity';
-            viewerImage.style.opacity = '0';
-            
-            // Восстанавливаем состояние просмотра
+            // Устанавливаем начальное состояние
             viewer.zoomTo(viewerState.zoom);
             viewer.moveTo(viewerState.x, viewerState.y);
-            
-            viewer.isShown = false;
-
-            // Плавно показываем новое изображение
-            requestAnimationFrame(() => {
-                viewerImage.style.opacity = '1';
-                viewerImage.style.transition = 'opacity 0.3s ease-in-out';
-                hideLoaderText();
-                
-                // Если есть старый просмотрщик, начинаем его плавное скрытие
-                if (oldViewer) {
-                    const oldViewerContainer = oldViewer.container;
-                    const oldViewerImage = oldViewerContainer.querySelector('.viewer-canvas img');
-                    if (oldViewerImage) {
-                        // Добавляем задержку в 1 секунду
-                        setTimeout(() => {
-                            oldViewerImage.style.transition = 'opacity 0.3s ease-in-out';
-                            oldViewerImage.style.opacity = '0';
-                            
-                            oldViewerImage.addEventListener('transitionend', () => {
-                                oldViewer.destroy();
-                                oldViewerContainer.remove();
-                            }, { once: true });
-                        }, 1000);
-                    } else {
-                        oldViewer.destroy();
-                        oldViewerContainer.remove();
-                    }
-                }
-                
-                viewerImage.addEventListener('transitionend', () => {
-                    viewerImage.style.willChange = 'none';
-                    viewer.options.transition = true;
-                }, { once: true });
-            });
+            hideLoader();
+            hideLoaderText();
         }
     });
-
-    return viewer;
 };
 
 // Navigation
@@ -220,7 +172,20 @@ const loadMap = () => {
     const image = new Image();
     image.src = currentMap.map;
     image.onload = () => {
+        // Добавляем изображение в DOM
+        mapContainer.appendChild(image);
+        image.style.opacity = '0';
+        image.style.transition = 'opacity 0.3s ease-in-out';
+        
+        // Создаем новый просмотрщик
         createViewer(image);
+        
+        // Плавно показываем новое изображение
+        requestAnimationFrame(() => {
+            image.style.opacity = '1';
+            hideLoader();
+            hideLoaderText();
+        });
     };
     image.onerror = () => {
         hideLoader();
