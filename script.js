@@ -75,6 +75,12 @@ const createViewer = (image) => {
         }
     });
 
+    // Создаем временный контейнер для изображения
+    const tempContainer = document.createElement('div');
+    tempContainer.style.display = 'none';
+    tempContainer.appendChild(image);
+    document.body.appendChild(tempContainer);
+
     // Создаем новый просмотрщик
     viewer = new Viewer(image, {
         inline: true,
@@ -92,6 +98,8 @@ const createViewer = (image) => {
         keyboard: true,
         container: mapContainer,
         ready() {
+            // Удаляем временный контейнер
+            document.body.removeChild(tempContainer);
             // Скрываем индикатор загрузки как только просмотрщик готов
             hideLoader();
             hideLoaderText();
