@@ -16,6 +16,14 @@ const MAP_TITLES = {
     'Tatishcheva-Predlozheniya-Zhivyh-ulic-min': 'Предложения Живых улиц'
 };
 
+// Функция для нормализации русских символов в пути
+function normalizePathComponent(str) {
+    // Нормализуем Unicode-символы (например, комбинированные символы)
+    const normalized = str.normalize('NFKC');
+    // Заменяем пробелы на дефисы
+    return encodeURIComponent(normalized);
+}
+
 // Функция для получения человекочитаемого названия из имени файла
 function getTitleFromFilename(filename) {
     const basename = path.basename(filename, path.extname(filename));
@@ -54,7 +62,7 @@ function scanImagesDirectory() {
         if (images.length > 0) {
             const maps = images.map((image, imageIndex) => ({
                 title: getTitleFromFilename(image),
-                map: `/unified-livestreets/images/${encodeURIComponent(setDir)}/${encodeURIComponent(image)}`,
+                map: `/unified-livestreets/images/${normalizePathComponent(setDir)}/${normalizePathComponent(image)}`,
                 default: imageIndex === 0 // Первое изображение будет default
             }));
 
