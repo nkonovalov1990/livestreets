@@ -122,13 +122,16 @@ const createViewer = (image, oldViewer = null, shouldKeepState = true) => {
                     const oldViewerContainer = oldViewer.container;
                     const oldViewerImage = oldViewerContainer.querySelector('.viewer-canvas img');
                     if (oldViewerImage) {
-                        oldViewerImage.style.transition = 'opacity 0.3s ease-in-out';
-                        oldViewerImage.style.opacity = '0';
-                        
-                        oldViewerImage.addEventListener('transitionend', () => {
-                            oldViewer.destroy();
-                            oldViewerContainer.remove();
-                        }, { once: true });
+                        // Добавляем задержку в 1 секунду
+                        setTimeout(() => {
+                            oldViewerImage.style.transition = 'opacity 0.3s ease-in-out';
+                            oldViewerImage.style.opacity = '0';
+                            
+                            oldViewerImage.addEventListener('transitionend', () => {
+                                oldViewer.destroy();
+                                oldViewerContainer.remove();
+                            }, { once: true });
+                        }, 1000);
                     } else {
                         oldViewer.destroy();
                         oldViewerContainer.remove();
