@@ -75,11 +75,12 @@ const createViewer = (image) => {
         }
     });
 
-    // Создаем временный контейнер для изображения
-    const tempContainer = document.createElement('div');
-    tempContainer.style.display = 'none';
-    tempContainer.appendChild(image);
-    document.body.appendChild(tempContainer);
+    // Добавляем изображение в контейнер карты
+    mapContainer.innerHTML = '';
+    mapContainer.appendChild(image);
+    image.style.opacity = '0';
+    image.style.maxWidth = '100%';
+    image.style.maxHeight = '100%';
 
     // Создаем новый просмотрщик
     viewer = new Viewer(image, {
@@ -98,8 +99,6 @@ const createViewer = (image) => {
         keyboard: true,
         container: mapContainer,
         ready() {
-            // Удаляем временный контейнер
-            document.body.removeChild(tempContainer);
             // Скрываем индикатор загрузки как только просмотрщик готов
             hideLoader();
             hideLoaderText();
