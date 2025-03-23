@@ -59,10 +59,11 @@ const createViewer = (image, shouldKeepState = true) => {
     // Сохраняем состояние текущего просмотрщика, если он есть
     let previousState = null;
     if (viewer && shouldKeepState) {
+        const imageData = viewer.imageData;
         previousState = {
-            zoom: viewer.imageData.ratio,
-            x: viewer.imageData.x,
-            y: viewer.imageData.y
+            zoom: imageData.ratio,
+            x: imageData.left,
+            y: imageData.top
         };
     }
 
@@ -123,12 +124,12 @@ const createViewer = (image, shouldKeepState = true) => {
             // Устанавливаем состояние просмотрщика
             if (previousState && shouldKeepState) {
                 // Используем сохраненное состояние предыдущего просмотрщика
-                viewer.moveTo(previousState.x, previousState.y);
                 viewer.zoomTo(previousState.zoom);
+                viewer.moveTo(previousState.x, previousState.y);
             } else {
                 // Используем начальное состояние
-                viewer.moveTo(viewerState.x, viewerState.y);
                 viewer.zoomTo(viewerState.zoom);
+                viewer.moveTo(viewerState.x, viewerState.y);
             }
         }
     });
@@ -184,8 +185,8 @@ const renderMaps = () => {
                 // Сохраняем состояние до обновления currentMap
                 const state = viewer ? {
                     zoom: viewer.imageData.ratio,
-                    x: viewer.imageData.x,
-                    y: viewer.imageData.y
+                    x: viewer.imageData.left,
+                    y: viewer.imageData.top
                 } : null;
                 
                 currentMap = map;
