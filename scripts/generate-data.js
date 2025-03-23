@@ -62,7 +62,7 @@ function scanImagesDirectory() {
         if (images.length > 0) {
             const maps = images.map((image, imageIndex) => ({
                 title: getTitleFromFilename(image),
-                map: `images/${normalizePathComponent(setDir)}/${normalizePathComponent(image)}`,
+                map: `/images/${normalizePathComponent(setDir)}/${normalizePathComponent(image)}`,
                 default: imageIndex === 0 // Первое изображение будет default
             }));
 
