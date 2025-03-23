@@ -327,12 +327,24 @@ window.addEventListener('DOMContentLoaded', () => {
     showLoader();
     showLoaderText();
     
+    renderSets();
+    renderMaps();
+
+    if (!currentMap) {
+        hideLoader();
+        hideLoaderText();
+        return;
+    }
+    
     const initialImage = new Image();
     initialImage.onload = () => {
         mapContainer.appendChild(initialImage);
         createViewer(initialImage);
-        renderSets();
-        renderMaps();
+    };
+    initialImage.onerror = () => {
+        hideLoader();
+        hideLoaderText();
+        console.error('Failed to load initial image:', currentMap.map);
     };
     initialImage.src = currentMap.map;
 }); 
