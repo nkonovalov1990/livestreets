@@ -54,7 +54,7 @@ function scanImagesDirectory() {
         if (images.length > 0) {
             const maps = images.map((image, imageIndex) => ({
                 title: getTitleFromFilename(image),
-                map: `/images/${encodeURIComponent(setDir)}/${encodeURIComponent(image)}`,
+                map: `/unified-livestreets/images/${encodeURIComponent(setDir)}/${encodeURIComponent(image)}`,
                 default: imageIndex === 0 // Первое изображение будет default
             }));
 
@@ -78,7 +78,7 @@ function generateDataFile() {
 // Определяем базовый путь в зависимости от окружения
 const BASE_PATH = location.hostname === 'localhost' || location.hostname === '127.0.0.1' 
     ? '.' 
-    : '/livestreets/unified-livestreets';
+    : '/livestreets';
 
 // Преобразуем пути к изображениям
 const SETS = ${JSON.stringify(sets, null, 4)}.map(set => ({
