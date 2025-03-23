@@ -110,12 +110,22 @@ const createViewer = (image, oldViewer = null, shouldKeepState = true) => {
                 viewerImage.style.transition = 'opacity 0.3s ease-in-out';
                 hideLoaderText();
                 
-                viewerImage.addEventListener('transitionend', () => {
-                    // После появления новой карты удаляем старую
-                    if (oldViewer) {
+                // Если есть старый просмотрщик, начинаем его плавное скрытие
+                if (oldViewer) {
+                    const oldViewerImage = document.querySelector('.viewer-canvas img:first-child');
+                    if (oldViewerImage) {
+                        oldViewerImage.style.transition = 'opacity 0.3s ease-in-out';
+                        oldViewerImage.style.opacity = '0';
+                        
+                        oldViewerImage.addEventListener('transitionend', () => {
+                            oldViewer.destroy();
+                        }, { once: true });
+                    } else {
                         oldViewer.destroy();
                     }
-                    
+                }
+                
+                viewerImage.addEventListener('transitionend', () => {
                     viewerImage.style.willChange = 'none';
                     viewer.options.transition = true;
                 }, { once: true });
@@ -173,9 +183,6 @@ const loadMap = () => {
         // Сохраняем старый просмотрщик для плавного перехода
         const oldViewer = viewer;
         
-        // Очищаем контейнер от всех изображений
-        mapContainer.querySelectorAll('img').forEach(img => img.remove());
-        
         // Добавляем новое изображение
         mapContainer.appendChild(newImage);
         
@@ -189,6 +196,7 @@ const loadMap = () => {
         hideLoaderText();
     };
     
+    // Предзагружаем изображение
     newImage.src = currentMap.map;
 };
 
