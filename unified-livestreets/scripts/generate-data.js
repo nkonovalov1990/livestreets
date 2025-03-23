@@ -54,7 +54,7 @@ function scanImagesDirectory() {
         if (images.length > 0) {
             const maps = images.map((image, imageIndex) => ({
                 title: getTitleFromFilename(image),
-                map: `./images/${encodeURIComponent(setDir)}/${encodeURIComponent(image)}`,
+                map: `/images/${encodeURIComponent(setDir)}/${encodeURIComponent(image)}`,
                 default: imageIndex === 0 // Первое изображение будет default
             }));
 
@@ -74,7 +74,20 @@ function scanImagesDirectory() {
 // Генерируем data.js
 function generateDataFile() {
     const sets = scanImagesDirectory();
-    const content = `const SETS = ${JSON.stringify(sets, null, 4)};`;
+    const content = `
+// Определяем базовый путь в зависимости от окружения
+const BASE_PATH = location.hostname === 'localhost' || location.hostname === '127.0.0.1' 
+    ? '.' 
+    : '/livestreets';
+
+// Преобразуем пути к изображениям
+const SETS = ${JSON.stringify(sets, null, 4)}.map(set => ({
+    ...set,
+    maps: set.maps.map(map => ({
+        ...map,
+        map: BASE_PATH + map.map
+    }))
+}));`;
     fs.writeFileSync(path.join(__dirname, '..', 'data.js'), content);
 }
 
