@@ -55,15 +55,19 @@ const getScreenCenter = () => ({
 });
 
 // Initialize viewer
-const createViewer = (image) => {
-    // Очищаем старый просмотрщик
-    if (viewer) {
-        // Сохраняем состояние перед удалением
-        viewerState = {
+const createViewer = (image, shouldKeepState = true) => {
+    // Сохраняем состояние текущего просмотрщика, если он есть
+    let previousState = null;
+    if (viewer && shouldKeepState) {
+        previousState = {
             zoom: viewer.zoomRatio,
             x: viewer.viewer.translateX,
             y: viewer.viewer.translateY
         };
+    }
+
+    // Очищаем старый просмотрщик
+    if (viewer) {
         viewer.destroy();
         viewer = null;
     }
@@ -116,9 +120,16 @@ const createViewer = (image) => {
                 });
             }
             
-            // Устанавливаем начальное состояние
-            viewer.zoomTo(viewerState.zoom);
-            viewer.moveTo(viewerState.x, viewerState.y);
+            // Устанавливаем состояние просмотрщика
+            if (previousState && shouldKeepState) {
+                // Используем сохраненное состояние предыдущего просмотрщика
+                viewer.zoomTo(previousState.zoom);
+                viewer.moveTo(previousState.x, previousState.y);
+            } else {
+                // Используем начальное состояние
+                viewer.zoomTo(viewerState.zoom);
+                viewer.moveTo(viewerState.x, viewerState.y);
+            }
         }
     });
 };
@@ -195,9 +206,8 @@ const loadMap = () => {
     const image = new Image();
     image.src = currentMap.map;
     image.onload = () => {
-        // Создаем новый просмотрщик без добавления изображения в DOM
-        createViewer(image);
-        // Индикатор загрузки скрывается в событии ready просмотрщика
+        // При загрузке карты сохраняем состояние, если это переключение внутри набора
+        createViewer(image, true);
     };
     image.onerror = () => {
         hideLoader();
@@ -232,7 +242,17 @@ setsSelect.addEventListener('change', (e) => {
     
     showLoader();
     showLoaderText();
-    loadMap();
+    // При смене набора НЕ сохраняем состояние
+    const image = new Image();
+    image.src = currentMap.map;
+    image.onload = () => {
+        createViewer(image, false);
+    };
+    image.onerror = () => {
+        hideLoader();
+        hideLoaderText();
+        console.error('Failed to load image:', currentMap.map);
+    };
 });
 
 // Handle browser back/forward buttons
