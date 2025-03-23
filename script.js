@@ -28,7 +28,8 @@ const updateUrlParams = (setId) => {
 const urlParams = getUrlParams();
 let currentSet = SETS.find(set => set.id === urlParams.setId) || 
                 SETS.find(set => set.default) || 
-                SETS[0];
+                SETS[0] ||
+                { maps: [] }; // Добавляем пустой набор по умолчанию
 let currentMap = currentSet.maps.find(map => map.default) || currentSet.maps[0];
 let viewer = null;
 
@@ -151,12 +152,22 @@ const createViewer = (image, oldViewer = null, shouldKeepState = true) => {
 
 // Navigation
 const renderSets = () => {
+    const setsSelect = document.querySelector('[data-sets-select]');
     setsSelect.innerHTML = '';
+
+    if (!SETS.length) {
+        const option = document.createElement('option');
+        option.value = '';
+        option.textContent = 'Нет доступных наборов';
+        setsSelect.appendChild(option);
+        return;
+    }
+
     SETS.forEach(set => {
         const option = document.createElement('option');
         option.value = set.id;
         option.textContent = set.title;
-        option.selected = set.id === currentSet.id;
+        option.selected = set === currentSet;
         setsSelect.appendChild(option);
     });
 };
@@ -168,49 +179,54 @@ const updateMapButtons = () => {
 };
 
 const renderMaps = () => {
-    mapsListContainer.innerHTML = '';
+    const mapsList = document.querySelector('[data-maps-list]');
+    mapsList.innerHTML = '';
+
+    if (!currentSet.maps.length) {
+        const message = document.createElement('div');
+        message.textContent = 'В этом наборе нет карт';
+        message.style.padding = '8px';
+        mapsList.appendChild(message);
+        return;
+    }
+
     currentSet.maps.forEach(map => {
         const button = document.createElement('button');
-        button.className = 'map-button';
+        button.className = `map-button${map === currentMap ? ' active' : ''}`;
         button.textContent = map.title;
-        button.dataset.map = map.map;
-        if (map.map === currentMap.map) {
-            button.classList.add('active');
-        }
         button.addEventListener('click', () => {
-            currentMap = map;
-            updateMapButtons();
-            loadMap();
+            if (map !== currentMap) {
+                currentMap = map;
+                loadMap();
+                updateMapButtons();
+            }
         });
-        mapsListContainer.appendChild(button);
+        mapsList.appendChild(button);
     });
 };
 
 const loadMap = () => {
+    if (!currentMap) {
+        if (viewer) {
+            viewer.destroy();
+            viewer = null;
+        }
+        return;
+    }
+
     showLoader();
     showLoaderText();
-    
-    // Создаем новое изображение
-    const newImage = new Image();
-    newImage.onload = () => {
-        // Сохраняем старый просмотрщик для плавного перехода
-        const oldViewer = viewer;
-        
-        // Добавляем новое изображение
-        mapContainer.appendChild(newImage);
-        
-        // Создаем новый viewer, указывая, нужно ли сохранять состояние
-        createViewer(newImage, oldViewer, true);
+
+    const image = new Image();
+    image.src = currentMap.map;
+    image.onload = () => {
+        createViewer(image);
     };
-    
-    newImage.onerror = () => {
-        console.error(`Failed to load image: ${currentMap.map}`);
+    image.onerror = () => {
         hideLoader();
         hideLoaderText();
+        console.error('Failed to load image:', currentMap.map);
     };
-    
-    // Предзагружаем изображение
-    newImage.src = currentMap.map;
 };
 
 // Reset viewer state
